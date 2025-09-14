@@ -1,72 +1,30 @@
-#!/usr/bin/env python3
-
-from random import randint, choice as rc
-
-from faker import Faker
-
+# server/seed.py
 from app import app
 from models import db, Game, Review, User
 
-
-fake = Faker()
-
 with app.app_context():
+    # Clear existing data
+    db.drop_all()
+    db.create_all()
 
-    Review.query.delete()
-    User.query.delete()
-    Game.query.delete()
-
-    users = []
-    for i in range(3):
-        u = User(name=fake.name())
-        users.append(u)
-
-    db.session.add_all(users)
-
-    games = []
-    games.append(Game(
-        title='Mega Adventure',
-        genre='Survival',
-        platform='XBox',
-        price=30))
-    games.append(Game(
-        title='Golf Pro IV',
-        genre='Sports',
-        platform="PlayStation",
-        price=20))
-    games.append(Game(
-        title='Dance, dance, dance',
-        genre='Party',
-        platform="PlayStation",
-        price=7))
-    db.session.add_all(games)
-
-    reviews = []
-    reviews.append(Review(
-        score=9,
-        comment='Amazing action',
-        user=users[0],
-        game=games[0]))
-    reviews.append(Review(
-        score=2,
-        comment='Boring',
-        user=users[0],
-        game=games[1]))
-    reviews.append(Review(
-        score=5,
-        comment='Not enough levels',
-        user=users[1],
-        game=games[0]))
-    reviews.append(Review(
-        score=randint(0, 10),
-        comment='confusing instructions',
-        user=users[2],
-        game=games[2]))
-    db.session.add_all(reviews)
-
-    for g in games:
-        r = rc(reviews)
-        g.review = r
-        reviews.remove(r)
-
+    # Create sample games
+    game1 = Game(title="Mega Adventure", genre="Survival", platform="XBox", price=30)
+    game2 = Game(title="Golf Pro IV", genre="Sports", platform="PlayStation", price=20)
+    game3 = Game(title="Dance, dance, dance", genre="Party", platform="PlayStation", price=7)
+    
+    # Create sample users
+    user1 = User(name="Jose Coleman")
+    user2 = User(name="Joshua Brown")
+    user3 = User(name="Emily Chen")
+    
+    # Create sample reviews
+    review1 = Review(score=9, comment="Amazing action", game=game1, user=user1)
+    review2 = Review(score=5, comment="Not enough levels", game=game1, user=user2)
+    review3 = Review(score=8, comment="Great graphics", game=game2, user=user1)
+    review4 = Review(score=7, comment="Fun with friends", game=game3, user=user3)
+    
+    # Add all to session and commit
+    db.session.add_all([game1, game2, game3, user1, user2, user3, review1, review2, review3, review4])
     db.session.commit()
+    
+    print("Database seeded successfully!")
